@@ -194,7 +194,7 @@ def point_student():
         return jsonify({"code": "1"})
 
 
-@app.route("found_work", methods=["POST"])
+@app.route("/found_work", methods=["POST"])
 def found_word():
     if request.method == 'POST':
         data = request.get_data()
