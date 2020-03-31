@@ -78,7 +78,6 @@ def information():
         db = SQLManager()
         messages = db.get_one("select * from edu_message where mailbox='%s'" % mailbox)
         teache = db.get_one("select * from techer_meaage where tearch_mailbox='%s'" % mailbox)
-        print(messages, teache)
         if messages:
             name = messages["name"] if "name" in messages else ""
             age = messages["age"] if "age" in messages else ""
@@ -122,7 +121,7 @@ def curriculum():
                     "select * from curriculum where curriculum_id='%s'" % curriculum_id)
                 for curriculum_info in curriculum_message:
                     curriculum_name = curriculum_info[
-                        "curriculum_name"] if "curriculum_name" in curriculum_info else ""
+                        "curriculum_nacurriculum_name"] if "curriculum_nacurriculum_name" in curriculum_info else ""
                     curriculum_num = curriculum_info[
                         "curriculum_num"] if "curriculum_num" in curriculum_info else ""
                     curriculum_id = curriculum_info["curriculum_id"] if "curriculum_id" in curriculum_info else ""
@@ -137,7 +136,7 @@ def curriculum():
                         curriculum_dict["curriculum_num"] = curriculum_num
                         curriculum_dict["curriculum_id"] = curriculum_id
                         curriculum_dict["score"] = score_num
-                       	ccurriculum_dict["teache_name"] = te_name
+                       	curriculum_dict["teache_name"] = te_name
                         curr_list.append(curriculum_dict)
                     elif diction == "2" or "3":
                         curriculum_dict["curriculum_name"] = curriculum_name
