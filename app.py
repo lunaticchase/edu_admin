@@ -184,33 +184,166 @@ def point_student():
         score_num = data["score_num"] if "score_num" in data else ""
         print(score_num)
         db = SQLManager()
-        score_msg = db.get_list("select * from score  where (stu_id = '%s' and curriculum_id = '%s')" % (sut_id,curriculum_id))
+        score_msg = db.get_list(
+            "select * from score  where (stu_id = '%s' and curriculum_id = '%s')" % (sut_id, curriculum_id))
         if score_msg:
             return jsonify({"code": "2", "message": "已经打过分数请不要重复打分"})
         try:
-            cur = db.create("insert into score(stu_id,curriculum_id,score_num) value('%s','%s',%d)" %(sut_id, curriculum_id, int(score_num)))
+            cur = db.create("insert into score(stu_id,curriculum_id,score_num) value('%s','%s',%d)" % (
+                sut_id, curriculum_id, int(score_num)))
         except Exception as e:
             return jsonify({"code": "2", "message": "%s" % e})
         return jsonify({"code": "1"})
 
 
-@app.route("found_work", methods=["POST"])
-def found_word():
+@app.route("/found_work", methods=["POST"])
+def found_work():
     if request.method == 'POST':
         data = request.get_data()
-        data = json.loads(data, encoding="utf-8")
+        data = str(data, encoding="utf-8")
+        data = eval(data)
+        # data = json.loads(data, encoding="utf-8")
         found_message = data["found_message"] if "found_message" in data else ""
         curriculum_id = data["curriculum_id"] if "curriculum_id" in data else ""
         db = SQLManager()
         try:
-            cur = db.create("insert into curriculum(stu_id,curriculum_id,score_num) value('%s','%s',%d)" % ())
+            cur = db.create("update curriculum set found_message = '%s' where curriculum_id = '%s'" % (
+                found_message, curriculum_id))
         except Exception as e:
             return jsonify({"code": "2", "message": "%s" % e})
         return jsonify({"code": "1"})
 
-# @app.route('/index')
-# def hello_world():
-#   return 'Hello World!'
+
+@app.route("/examination_message", methods=["POST"])
+def examination_message():
+    if request.method == 'POST':
+        data = request.get_data()
+        data = str(data, encoding="utf-8")
+        data = eval(data)
+        # data = json.loads(data, encoding="utf-8")
+        examination_message = data["examination_message"] if "examination_message" in data else ""
+        curriculum_id = data["curriculum_id"] if "curriculum_id" in data else ""
+        db = SQLManager()
+        try:
+            cur = db.create("update curriculum set examination_message = '%s' where curriculum_id = '%s'" % (
+                examination_message, curriculum_id))
+        except Exception as e:
+            return jsonify({"code": "2", "message": "%s" % e})
+        return jsonify({"code": "1"})
+
+
+@app.route("/curricula", methods=["POST"])
+def curricula():
+    if request.method == 'POST':
+        data = request.get_data()
+        # data = str(data, encoding="utf-8")
+        # data = eval(data)
+        data = json.loads(data, encoding="utf-8")
+        stu_id = data["stu_id"] if "stu_id" in data else ""
+        curriculum_id = data["curriculum_id"] if "curriculum_id" in data else ""
+        db = SQLManager()
+        stu_id_1 = db.get_one("select stu_id from curriculum where curriculum_id='%s'" % curriculum_id)
+        stu_id_1 = stu_id_1["stu_id"]
+        stu_list = stu_id_1.split(",")
+        stu_list.append(stu_id)
+        stu_list = ",".join(stu_list)
+        print(stu_list)
+        try:
+            cur = db.create("update curriculum set stu_id = '%s' where curriculum_id = '%s'" % (
+                stu_id, curriculum_id))
+        except Exception as e:
+            return jsonify({"code": "2", "message": "%s" % e})
+        return jsonify({"code": "1"})
+
+
+@app.route("/publish_forum", methods=["POST"])
+def publish_forum():
+    if request.method == 'POST':
+        data = request.get_data()
+        data = json.loads(data, encoding="utf-8")
+        publish_name = data["publish_name"] if "publish_name" in data else ""
+        publish_title = data["publish_title"] if "publish_title" in data else ""
+        publish_message = data["publish_message"] if "publish_message" in data else ""
+        db = SQLManager()
+        try:
+            cur = db.create("insert into forum(forum_title,forum_message,publish_name) value('%s', '%s', '%s')" % (
+                publish_title, publish_message, publish_name))
+        except Exception as e:
+            return jsonify({"code": "2", "message": "%s" % e})
+        return jsonify({"code": "1"})
+
+
+@app.route("/forum", methods=["GET"])
+def forum():
+    if request.method == 'GET':
+        db = SQLManager()
+        forum_list = db.get_list("select * from forum")
+        forum_data = list()
+        for forum_msg in forum_list:
+            forum_dict = dict()
+            forum_dict["publish_name"] = forum_msg["publish_name"]
+            forum_dict["publish_id"] = forum_msg["forum_id"]
+            forum_dict["publish_title"] = forum_msg["forum_title"]
+            forum_dict["publish_msg"] = forum_msg["forum_message"]
+            forum_data.append(forum_dict)
+        return jsonify({"code": "1", "forum_data": forum_data})
+
+
+@app.route("/forum_comment", methods=["POST"])
+def forum_comment():
+    if request.method == 'POST':
+        data = request.get_data()
+        data = json.loads(data, encoding="utf-8")
+        publish_id = data["publish_id"] if "publish_id" in data else ""
+        id = data["id"] if "id" in data else ""
+        invitation_message = data["invitation_message"] if "invitation_message" in data else ""
+        diction = data["diction"] if "diction" in data else ""
+        db = SQLManager()
+        if diction == "1" or "3":
+            try:
+                cur = db.create(
+                    "insert into invitation(forum_id, stu_id, invitation_message) value ('%s', '%s', '%s')" % (
+                    publish_id, id, invitation_message))
+            except Exception as e:
+                return jsonify({"code": "2", "message": "%s" % e})
+            return jsonify({"code": "1"})
+        else:
+            try:
+                cur = db.create(
+                    "insert into invitation(forum_id, techer_id, invitation_message) value ('%s', '%s', '%s')" % (
+                    publish_id, id, invitation_message))
+            except Exception as e:
+                return jsonify({"code": "2", "message": "%s" % e})
+            return jsonify({"code": "1"})
+
+
+@app.route("/forum_message", methods=["POST"])
+def forum_message():
+    if request.method == 'POST':
+        data = request.get_data()
+        data = str(data, encoding="utf-8")
+        data = eval(data)
+        # # data = json.loads(data, encoding="utf-8")
+        publish_id = data["publish_id"] if "publish_id" in data else ""
+        db = SQLManager()
+        invitation_data_1 = db.get_list("select * from invitation where forum_id= '%s' " % publish_id)
+        invid_list = list()
+        for invid in invitation_data_1:
+            invitation_data = dict()
+            invitation_message = invid["invitation_message"] if "invitation_message" in invid else ""
+            invitation_data["invitation_message"] = invitation_message
+            stu_id = invid["stu_id"] if "stu_id" in invid else ""
+            techer_id = invid["techer_id"] if "techer_id" in invid else ""
+            if stu_id:
+                name = db.get_one("select name from edu_message where stu_id= '%s' " % stu_id)
+                invitation_data["invitation_name"] = name["name"]
+            elif techer_id:
+                name = db.get_one("select tearch_name from techer_meaage where techer_id= '%s' " % techer_id)
+                invitation_data["invitation_name"] = name["tearch_name"]
+            invid_list.append(invitation_data)
+        print(invid_list)
+
+        return jsonify({"code": "1", "invitation_data":invid_list})
 
 
 if __name__ == '__main__':
