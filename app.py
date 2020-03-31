@@ -58,7 +58,7 @@ def login():
             else:
                 return jsonify({"code": "2", "message": "账号密码不正确"})
         elif teache:
-            if password == messages["techer_password"]:
+            if password == teache["tearch_password"]:
                 # sessions["username"] = messages["name"]
                 return jsonify({"code": "1"})
             else:
@@ -182,8 +182,31 @@ def point_student():
         sut_id = data["sut_id"] if "sut_id" in data else ""
         curriculum_id = data["curriculum_id"] if "curriculum_id" in data else ""
         score_num = data["score_num"] if "score_num" in data else ""
+        print(score_num)
         db = SQLManager()
+        score_msg = db.get_list("select * from score  where (stu_id = '%s' and curriculum_id = '%s')" % (sut_id,curriculum_id))
+        if score_msg:
+            return jsonify({"code": "2", "message": "已经打过分数请不要重复打分"})
+        try:
+            cur = db.create("insert into score(stu_id,curriculum_id,score_num) value('%s','%s',%d)" %(sut_id, curriculum_id, int(score_num)))
+        except Exception as e:
+            return jsonify({"code": "2", "message": "%s" % e})
+        return jsonify({"code": "1"})
 
+
+@app.route("found_work", methods=["POST"])
+def found_word():
+    if request.method == 'POST':
+        data = request.get_data()
+        data = json.loads(data, encoding="utf-8")
+        found_message = data["found_message"] if "found_message" in data else ""
+        curriculum_id = data["curriculum_id"] if "curriculum_id" in data else ""
+        db = SQLManager()
+        try:
+            cur = db.create("insert into curriculum(stu_id,curriculum_id,score_num) value('%s','%s',%d)" % ())
+        except Exception as e:
+            return jsonify({"code": "2", "message": "%s" % e})
+        return jsonify({"code": "1"})
 
 # @app.route('/index')
 # def hello_world():
