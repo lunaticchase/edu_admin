@@ -1,4 +1,4 @@
-from flask import Flask, jsonify, sessions, request,make_response
+from flask import Flask, jsonify, sessions, request, make_response
 from flask_sqlalchemy import SQLAlchemy
 # from flask_cors import CORS
 import json
@@ -11,6 +11,7 @@ app = Flask(__name__)
 # CORS(app, supports_credentials=True)
 app.config.from_object(__name__)
 app.config["SECRET_KEY"] = os.urandom(24)
+
 
 @app.after_request
 def af_request(resp):
@@ -114,9 +115,8 @@ def curriculum():
             curriculum_id = messages["curriculum_id"] if "curriculum_id" in messages else ""
             curriculum_list = curriculum_id.strip(",").split(",")
             curr_list = list()
-            techer_list = list()
-            curriculum_dict = dict()
             for curriculum_id in curriculum_list:
+                curriculum_dict = dict()
                 # print(curriculum_id)
                 curriculum_message = db.get_list(
                     "select * from curriculum where curriculum_id='%s'" % curriculum_id)
@@ -136,8 +136,8 @@ def curriculum():
                         curriculum_dict["curriculum_name"] = curriculum_name
                         curriculum_dict["curriculum_num"] = curriculum_num
                         curriculum_dict["curriculum_id"] = curriculum_id
-                        curriculum_dict["score_num"] = score_num
-                        curriculum_dict["te_name"] = te_name
+                        curriculum_dict["score"] = score_num
+                       	ccurriculum_dict["teache_name"] = te_name
                         curr_list.append(curriculum_dict)
                     elif diction == "2" or "3":
                         curriculum_dict["curriculum_name"] = curriculum_name
@@ -162,18 +162,28 @@ def see_student():
             stu_list = curriculum_messages["stu_id"] if "stu_id" in curriculum_messages else ""
             stu_list = stu_list.strip(",").split(",")
             stu_message = list()
-            stu_dt = dict()
+
             for stu_id in stu_list:
+                stu_dt = dict()
                 stu_name = db.get_list("select name from edu_message where  stu_id = '%s'" % stu_id)
                 for name in stu_name:
                     stu_dt["stu_id"] = stu_id
                     stu_dt["sut_name"] = name["name"]
-                    stu_message.append(stu_dt)
+                stu_message.append(stu_dt)
         else:
             return jsonify({"code": "2", "message": "权限不够"})
         return jsonify({"code": "1", "stu_meaages": stu_message})
 
 
+@app.route("/point_student", methods=["POST"])
+def point_student():
+    if request.method == 'POST':
+        data = request.get_data()
+        data = json.loads(data, encoding="utf-8")
+        sut_id = data["sut_id"] if "sut_id" in data else ""
+        curriculum_id = data["curriculum_id"] if "curriculum_id" in data else ""
+        score_num = data["score_num"] if "score_num" in data else ""
+        db = SQLManager()
 
 
 # @app.route('/index')
