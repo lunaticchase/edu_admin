@@ -327,8 +327,9 @@ def forum_message():
         publish_id = data["publish_id"] if "publish_id" in data else ""
         db = SQLManager()
         invitation_data_1 = db.get_list("select * from invitation where forum_id= '%s' " % publish_id)
-        forum_message_1 = db.get_one("select forum_message from forum where forum_id = '%s'"%publish_id)
+        forum_message_1 = db.get_one("select forum_message,forum_title from forum where forum_id = '%s'"%publish_id)
         forum_msg = forum_message_1["forum_message"] if "forum_message" in forum_message_1 else ""
+        forum_title = forum_message_1["forum_title"] if "forum_title" in forum_message_1 else ""
         invid_list = list()
         for invid in invitation_data_1:
             invitation_data = dict()
@@ -345,7 +346,7 @@ def forum_message():
             invid_list.append(invitation_data)
 #         print(invid_list)
 
-        return jsonify({"code": "1", "forum_message":forum_msg,"invitation_data":invid_list})
+        return jsonify({"code": "1", "forum_title":forum_title,"forum_message":forum_msg,"invitation_data":invid_list})
 
 
 if __name__ == '__main__':
